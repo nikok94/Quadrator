@@ -1,1 +1,3 @@
-!/**/.vhd
+/QuadratorFPGAprj_ddr/*
+!/QuadratorFPGAprj_ddr/*.vhd
+!/QuadratorFPGAprj_ddr/*.tcl
