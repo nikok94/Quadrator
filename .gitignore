@@ -1,7 +1,4 @@
 /QuadratorFPGAprj_ddr/*
-!/QuadratorFPGAprj_ddr/*.vhd
-!/QuadratorFPGAprj_ddr/*.tcl
-
 /QuadLexa_ver_flash/*
-!/QuadLexa_ver_flash/*.vhd
-!/QuadLexa_ver_flash/*.tcl
+!.vhd
+!.tcl
