@@ -62,7 +62,7 @@ process(clk,rst)
 begin
   if(rst = '1') then
     start_vec <= (others => '0');
-  else
+  elsif rising_edge(clk) then
     start_vec(start_vec'length - 1 downto 1) <= start_vec(start_vec'length-2 downto 0);
     start_vec(0) <= InStart;
     start <= (not start_vec(start_vec'length - 1)) and start_vec(start_vec'length - 2);
@@ -86,25 +86,30 @@ begin
         if (start = '1') then
           state <= CaptureST;
           OutBusy <= '1';
-          w_addr <= 0;
+          w_addr <= 1;
+			 memory(0) <= InData;
           SampleCounter <= (others => '0');
         end if;
       when CaptureST =>
-        if (InValid = '1') then
+		  if (valid = '1') then
+		    valid <= '0';
+		  end if;
+		  
+		  if (start = '1') then
+				w_addr <= 1;
+			   memory(0) <= InData;
+				SampleCounter <= (others => '0');
+        elsif (InValid = '1') then
           if (SampleCounter >= InDSamplParam) then
+			   SampleCounter <= (others => '0');
             if ((w_addr >= InNumWord) or (w_addr>=c_max_n_word)) then
                 state <= PushST;
                 ready <= '0';
                 r_addr <= 0;
                 OutDataLength <= conv_std_logic_vector(w_addr, OutDataLength'length);
             else
-                if (start = '1') then
-                  w_addr <= 0;
-                  memory(0) <= InData;
-                else
-                  memory(w_addr) <= InData;
-                  w_addr <= w_addr+1;
-                end if;
+					 memory(w_addr) <= InData;
+                w_addr <= w_addr+1;
             end if;
           else
             SampleCounter <= SampleCounter+1;
@@ -112,11 +117,13 @@ begin
         end if;
       when PushST =>
         OutData <= memory(r_addr);
-        if (start = '1') then
+        if ((start = '1') and (r_addr = 0)) then
           state <= CaptureST;
           OutBusy <= '1';
-          w_addr <= 0;
+          w_addr <= 1;
+			 memory(0) <= InData;
           SampleCounter <= (others => '0');
+			 valid <= '0';
         else
           if (r_addr >= w_addr) then
             state <= IdleST;
