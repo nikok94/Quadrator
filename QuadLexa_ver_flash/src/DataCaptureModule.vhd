@@ -52,8 +52,22 @@ ARCHITECTURE SYN OF DataCaptureModule IS
   signal valid                : std_logic;
   signal ready                : std_logic;
 --  signal buff_full            : std_logic;
+  signal start_vec				: std_logic_vector(2 downto 0);
+  signal start 					: std_logic;
+
 
 BEGIN
+
+process(clk,rst)
+begin
+  if(rst = '1') then
+    start_vec <= (others => '0');
+  else
+    start_vec(start_vec'length - 1 downto 1) <= start_vec(start_vec'length-2 downto 0);
+    start_vec(0) <= InStart;
+    start <= (not start_vec(start_vec'length - 1)) and start_vec(start_vec'length - 2);
+  end if;
+end process;
 
 process(clk, rst)
 begin
@@ -68,7 +82,8 @@ begin
         ready <= '1';
       when StartST =>
         OutBusy <= '0';
-        if (InStart = '1') then
+        --if (InStart = '1') then
+        if (start = '1') then
           state <= CaptureST;
           OutBusy <= '1';
           w_addr <= 0;
@@ -83,9 +98,13 @@ begin
                 r_addr <= 0;
                 OutDataLength <= conv_std_logic_vector(w_addr, OutDataLength'length);
             else
-                memory(w_addr) <= InData;
-                w_addr <= w_addr+1;
-                SampleCounter <= (others => '0');
+                if (start = '1') then
+                  w_addr <= 0;
+                  memory(0) <= InData;
+                else
+                  memory(w_addr) <= InData;
+                  w_addr <= w_addr+1;
+                end if;
             end if;
           else
             SampleCounter <= SampleCounter+1;
@@ -93,14 +112,21 @@ begin
         end if;
       when PushST =>
         OutData <= memory(r_addr);
-        if (r_addr >= w_addr) then
-          state <= IdleST;
-          valid <= '0';
+        if (start = '1') then
+          state <= CaptureST;
+          OutBusy <= '1';
+          w_addr <= 0;
+          SampleCounter <= (others => '0');
         else
-          valid <= '1';
-          if ((valid='1') and (OutReady='1')) then
-            r_addr <= r_addr+1;
+          if (r_addr >= w_addr) then
+            state <= IdleST;
             valid <= '0';
+          else
+            valid <= '1';
+            if ((valid='1') and (OutReady='1')) then
+              r_addr <= r_addr+1;
+              valid <= '0';
+            end if;
           end if;
         end if;
       when others =>
