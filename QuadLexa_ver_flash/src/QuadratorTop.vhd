@@ -1535,7 +1535,6 @@ DataCaptureModule_0_inst : ENTITY DataCaptureModule
     InDSamplParam   => SetupBuff(SetParametersStructure'pos(SamplingStep)),
 
     InData          => waveform_in_data,
-    InValid         => '1',
 
     InReady         => open,
 
