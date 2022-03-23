@@ -37,8 +37,9 @@ entity QuadratorTop is
     spi_sck         : out std_logic;
     adc_cs          : out std_logic;
     dac_cs          : out std_logic;
-    gtp             : out std_logic_vector(3 downto 0);
-    rtp             : out std_logic_vector(3 downto 0);
+    --gtp             : out std_logic_vector(3 downto 0);
+    --rtp             : out std_logic_vector(3 downto 0);
+    leds            : out std_logic_vector(3 downto 0);
     i2c_sda         : inout std_logic;
     i2c_scl         : inout std_logic;
     wp              : out std_logic;
@@ -352,8 +353,8 @@ optic_rx_vec_0_sync_proc :
 
 start_data_capture_ext <= (not optic_rx_vec_0_sync(optic_rx_vec_0_sync'length - 1)) and optic_rx_vec_0_sync(optic_rx_vec_0_sync'length - 2);
 
-uart_rxd <= optic_rx_vec(3);
-optic_tx_vec(3) <= uart_txd;
+uart_rxd <= not optic_rx_vec(3);
+optic_tx_vec(3) <= not uart_txd;
 
 optic_tx_vec(1) <= igbt;
 
@@ -874,10 +875,10 @@ begin
         SMQNextState <= SMQStable;
       end if;
     when SMQStable =>
-      if (SMQStableCounter >= 31) then
-        SMQNextState <= SMQEndState;
-      elsif SquaringModuleOut = '1' then
+      if (SquaringModuleOut = '1') then
         SMQNextState <= SMQMainProc;
+      elsif (SMQStableCounter >= 31) then
+        SMQNextState <= SMQEndState;
       end if;
     when SMQError =>
       if (reset_smq = '1') then
@@ -1023,14 +1024,18 @@ begin
   end if;
 end process;
 
-gtp(0) <= FlashData_Ready;
-gtp(1) <= counter125(counter125'length - 1);
-gtp(2) <= uart_tx_compleat;
---spi_sck <= counter125(counter125'length - 1);
+--gtp(0) <= FlashData_Ready;
+--gtp(1) <= counter125(counter125'length - 1);
+--gtp(2) <= uart_tx_compleat;
+----spi_sck <= counter125(counter125'length - 1);
+--
+--rtp(0) <= CRC_Error;
+--rtp(1) <= not clk_locked;
 
-rtp(0) <= CRC_Error;
-rtp(1) <= not clk_locked;
-
+leds(0) <= FlashData_Ready;
+leds(1) <= counter125(counter125'length - 1) and (clk_locked);
+leds(2) <= CRC_Error;
+leds(3) <= counter125(counter125'length - 1) and (clk_locked);
 
 ----------------------------------------
 -- main state process 
