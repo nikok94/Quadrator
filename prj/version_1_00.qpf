@@ -18,12 +18,12 @@
 #
 # Quartus II 64-Bit
 # Version 13.1.0 Build 162 10/23/2013 SJ Web Edition
-# Date created = 11:03:38  February 14, 2020
+# Date created = 17:44:55  March 23, 2022
 #
 # -------------------------------------------------------------------------- #
 
 QUARTUS_VERSION = "13.1"
-DATE = "11:03:38  February 14, 2020"
+DATE = "17:44:55  March 23, 2022"
 
 # Revisions
 
