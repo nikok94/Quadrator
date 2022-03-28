@@ -863,10 +863,14 @@ begin
         SMQNextState <= SMQStartProc;
       end if;
     when SMQStartProc =>
-      if (SquaringModuleOut = '0') then
-        SMQNextState <= SMQStable;
+      if (smq_en = '0') then
+        SMQNextState <= SMQError;
       else
-        SMQNextState <= SMQMainProc;
+        if (SquaringModuleOut = '1') then
+          SMQNextState <= SMQMainProc;
+        end if;
+--      else
+--        SMQNextState <= SMQMainProc;
       end if;
     when SMQMainProc =>
       if (smq_en = '0') then
