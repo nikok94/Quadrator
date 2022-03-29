@@ -338,6 +338,13 @@ architecture Behavioral of QuadratorTop is
     signal FlashGetData                     : std_logic_vector(31 downto 0);
     signal FlashGetValid                    : std_logic;
     signal FlashReadCompleat                : std_logic;
+    
+    signal cOfst_int                        : integer;
+    signal vOfst_int                        : integer;
+    signal c_int                            : integer;
+    signal v_int                            : integer;
+    
+    
 begin
 
 rst <= (not reset_n) or (not clk_locked);
@@ -815,8 +822,14 @@ begin
     VolttageValue_Int <= 0;
     ValidValue_Int <= '0';
   elsif rising_edge(clk_125MHz) then
-    CurrentValue_Int <= conv_integer(unsigned(adc_data_reg_sync1(27 downto 14))) - conv_integer(signed(FlashParametersBuff(FlashParametersStructure'pos(CurrentOffset))));
-    VolttageValue_Int <= conv_integer(unsigned(adc_data_reg_sync1(13 downto 0))) - conv_integer(signed(FlashParametersBuff(FlashParametersStructure'pos(VolttageOffset))));
+    c_int <= conv_integer(unsigned(adc_data_reg_sync1(27 downto 14)));
+    v_int <= conv_integer(unsigned(adc_data_reg_sync1(13 downto 00)));
+    
+    cOfst_int <= conv_integer(signed(FlashParametersBuff(FlashParametersStructure'pos(CurrentOffset))));
+    vOfst_int <= conv_integer(signed(FlashParametersBuff(FlashParametersStructure'pos(VolttageOffset))));
+  
+    CurrentValue_Int <= c_int - cOfst_int;
+    VolttageValue_Int <= v_int - vOfst_int;
   end if;
 end process;
 
