@@ -343,7 +343,7 @@ architecture Behavioral of QuadratorTop is
     signal vOfst_int                        : integer;
     signal c_int                            : integer;
     signal v_int                            : integer;
-    
+    signal start_bit                        : std_logic:= '0';
     
 begin
 
@@ -877,7 +877,8 @@ begin
       end if;
     when SMQStartProc =>
       if (smq_en = '0') then
-        SMQNextState <= SMQError;
+        --SMQNextState <= SMQError;
+        SMQNextState <= IDLE;
       else
         if (SquaringModuleOut = '1') then
           SMQNextState <= SMQMainProc;
@@ -887,7 +888,8 @@ begin
       end if;
     when SMQMainProc =>
       if (smq_en = '0') then
-        SMQNextState <= SMQError;
+        --SMQNextState <= SMQError;
+        SMQNextState <= IDLE;
       elsif (SquaringModuleOut = '0') then
         SMQNextState <= SMQStable;
       end if;
@@ -908,6 +910,17 @@ begin
     when others => 
       SMQNextState <= IDLE;
   end case;
+end process;
+
+process(clk_125MHz)
+begin
+  if rising_edge(clk_125MHz) then
+    if (SMQState = SMQStartProc) then
+      start_bit <= '0';
+    elsif(SMQState = SMQStable) then
+      start_bit <= '1';
+    end if;
+  end if;
 end process;
 
 SMQuadrator_Out_proc :
@@ -1541,7 +1554,8 @@ SquaringModuleOutNot <= not SquaringModuleOut;
 process(clk_125MHz)
 begin
   if rising_edge(clk_125MHz) then
-    waveform_in_data <= igbt & SquaringModuleOutNot & adc_data_reg_sync1(27 downto 14) & SquaringModuleOutNot & optic_rx_vec(1) & adc_data_reg_sync1(13 downto 0);
+   --waveform_in_data <= igbt & SquaringModuleOutNot & adc_data_reg_sync1(27 downto 14) & SquaringModuleOutNot & optic_rx_vec(1) & adc_data_reg_sync1(13 downto 0);
+    waveform_in_data <= igbt & SquaringModuleOutNot & adc_data_reg_sync1(27 downto 14) & start_bit & optic_rx_vec(1) & adc_data_reg_sync1(13 downto 0);
   end if;
 end process;
 
